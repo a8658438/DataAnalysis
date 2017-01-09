@@ -1,0 +1,10 @@
+com\minstone\service\impl\JddDataServiceImpl.class
+com\minstone\mapper\JddDataMapper.class
+com\minstone\pojo\JddDataExample.class
+com\minstone\pojo\JddDataExample$Criterion.class
+com\minstone\pojo\JddDataExample$Criteria.class
+com\minstone\service\JddDataService.class
+com\minstone\controller\JddDataController.class
+com\minstone\pojo\JddDataExample$GeneratedCriteria.class
+com\minstone\util\Result.class
+com\minstone\pojo\JddData.class
