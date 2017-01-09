@@ -282,4 +282,17 @@
 	<include refid="between_id" /> 
 	GROUP BY t.${column} 
   </select>
+  
+  <!-- 查询 某一列数据 -->
+  <select id="selectByColumn" resultType="hashMap" parameterType="hashMap"  >
+    SELECT t.* FROM jdd_data t 
+	<include refid="between_id" />
+  </select>
+  
+   <!-- 查询最近出现的数值 -->
+  <select id="selectLateByColumn" resultType="hashMap" parameterType="hashMap"  >
+    <![CDATA[
+    	SELECT max(t.id) id FROM jdd_data t where t.id < #{id} and t.${column}=#{num}
+    ]]>
+  </select>
 </mapper>

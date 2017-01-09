@@ -22,17 +22,25 @@ public class JddDataTest {
 		param.put("startNum", 114);
 		param.put("endNum", 153);
 //		service.selectSumByStage(param);
-//		service.selectMaxAndMinByColumn(param);
+		service.selectMaxAndMinByColumn(param);
 		param.put("column", "one");
 		param.put("countNum", 40);
 //		service.selectCountByColumn(param);
-		service.countColumnProbability(param);
+//		service.countColumnProbability(param);
 	}
 	
 	@Test
 	public void test1() {
 		JddDataService service = (JddDataService) context.getBean(JddDataService.class);
-		service.countColumnProbability(154,"two");
+		service.getMaybeNumbers(154);
+	}
+	
+	@Test
+	public void test2() {
+		JddDataService service = (JddDataService) context.getBean(JddDataService.class);
+		for (int i = 1; i <= 49; i++) {
+		}
+//		service.countColumnProbabilityAndRange(154,"one");
 	}
 	
 	public static void main(String[] args) {

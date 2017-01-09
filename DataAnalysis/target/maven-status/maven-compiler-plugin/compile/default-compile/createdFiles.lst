@@ -1,5 +1,7 @@
+com\minstone\util\CommonUtil.class
 com\minstone\service\impl\JddDataServiceImpl.class
 com\minstone\mapper\JddDataMapper.class
+com\minstone\util\Constant.class
 com\minstone\pojo\JddDataExample.class
 com\minstone\pojo\JddDataExample$Criterion.class
 com\minstone\pojo\JddDataExample$Criteria.class
