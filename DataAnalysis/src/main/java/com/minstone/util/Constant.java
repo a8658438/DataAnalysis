@@ -60,5 +60,8 @@ public class Constant {
 	 */
 	public static String COLUMN_AND = "column_and";
 	
-	
+	/**
+	 * 表出现的频率
+	 */
+	public static String ALL_AVG = "all_avg";
 }

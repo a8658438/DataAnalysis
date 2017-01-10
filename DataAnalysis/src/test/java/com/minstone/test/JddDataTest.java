@@ -22,7 +22,7 @@ public class JddDataTest {
 		param.put("startNum", 114);
 		param.put("endNum", 153);
 //		service.selectSumByStage(param);
-		service.selectMaxAndMinByColumn(param);
+//		service.selectMaxAndMinByColumn(param);
 		param.put("column", "one");
 		param.put("countNum", 40);
 //		service.selectCountByColumn(param);

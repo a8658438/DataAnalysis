@@ -35,5 +35,6 @@ public interface JddDataMapper {
     Map<String, Integer> selectMaxAndMinByColumn(Map<String, Object> param);
     List<Map<String, Long>> selectCountByColumn(Map<String, Object> param);
     List<Map<String, Integer>> selectByColumn(Map<String, Object> param);
-    Map<String, Integer> selectLateByColumn(Map<String, Object> param);
+    Map<String, Integer> selectLateId(Map<String, Object> param);
+
 }

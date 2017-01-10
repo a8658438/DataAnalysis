@@ -36,18 +36,6 @@ public class JddDataServiceImpl implements JddDataService{
 	}
 
 	@Override
-	public Map<String, Integer> selectMaxAndMinByColumn(Map<String, Object> param) {
-		Map<String, Integer> maxAndMin = mapper.selectMaxAndMinByColumn(param);
-		return maxAndMin;
-	}
-	
-	@Override
-	public List<Map<String, Long>> selectCountByColumn(Map<String, Object> param) {
-		List<Map<String,Long>> list = mapper.selectCountByColumn(param);
-		return list;
-	}
-
-	@Override
 	public Map<Integer, Integer> countColumnProbability(Map<String, Object> param) {
 		List<Map<String,Long>> list = mapper.selectCountByColumn(param);
 		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
@@ -143,52 +131,112 @@ public class JddDataServiceImpl implements JddDataService{
 		param.put("column", Constant.ONE);
 		param.put("id", num);
 		Map<Integer, Map<String, Integer>> map = countColumnProbabilityAndRange(param);
-		map = compareAvg(map, param);//比对出现频率
-		differenceColumn(param,map);//计算行与行之间的差值
-		sumColumn(param,map);//计算行与行之间的和
+		map = compareAvg(map, param);//比对列出现频率
+		sumAndDifferenceColumn(param, map);//计算列的和与差之值
+		
+		//比对每期的出现频率
+		compareAllAvg(map, param);
 		return Result.ok();
-	}
-	
-	/**
-	 * 计算两行之间的和值
-	 * @param param
-	 * @param map
-	 */
-	private void sumColumn(Map<String, Object> param,
-			Map<Integer, Map<String, Integer>> map) {
-		Integer countNum = 25;//设置统计期数
-		param.put("startNum", (Integer)param.get("endNum") - countNum + 1);//设置查询的起始数据
-		String column = (String) param.get("column");//获取查询的列
-		List<Map<String, Integer>> list = mapper.selectByColumn(param);
-		
-		//计算每行之间的差值
-		int min = 0,max = 0;
-		for (int i = list.size()-1; i >= 1 ; i--) {
-			Map<String, Integer> map1 = list.get(i);
-			Map<String, Integer> map2 = list.get(i-1);
-			Integer and = map1.get(column) + map2.get(column);
-			if (and < min) min = and;
-			if (and > max) max = and; 
-			System.out.println(map1.get("id")+"-"+map2.get("id")+"和值为:"+and);
-		}
-		
-		//判断差值是否在范围之内
-		for (Integer num : map.keySet()) {
-			Map<String, Integer> numMap = map.get(num);
-			Map<String, Integer> preMap = list.get(list.size()-1);
-			Integer sub = num + preMap.get(column);
-			
-			numMap.put(Constant.COLUMN_AND, sub >= min && sub <= max ? Constant.MATE_TRUE:Constant.MATE_FALSE);
-		}
-		
 	}
 
 	/**
-	 * 计算每两行之间的差值
+	 * 比对每期的出现频率
+	 * @param map
+	 * @param param
+	 */
+	private void compareAllAvg(Map<Integer, Map<String, Integer>> map,Map<String, Object> param) {
+		//计算该列的数字平均多少期出现一次
+		Map<String, Object> avgMap = calculateNumShowAvgForAll(param);
+		
+		Map<String, Object> subParam = new HashMap<String, Object>();
+		subParam.put("id", param.get("id"));
+		for (Integer num : map.keySet()) {
+			Map<String, Integer> numMap = map.get(num);
+			//查询该数据最近出现的一次
+			subParam.put("num", num);
+			Map<String, Integer> lateMap = mapper.selectLateId(subParam);
+			
+			//比较判断该数值
+			numMap.put(Constant.ALL_AVG, Constant.MATE_FALSE);
+			if (lateMap != null && lateMap.get("id") != null) {
+				Integer sub = (Integer)param.get("id") - lateMap.get("id");
+				if (((Boolean)avgMap.get("maxMore") && sub > (Double)avgMap.get("avg"))
+						|| (!(Boolean)avgMap.get("maxMore") && sub < (Double)avgMap.get("avg"))) {
+					numMap.put(Constant.ALL_AVG, Constant.MATE_TRUE);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 计算近30期该行的每个数据平均多少期出现一次
+	 * @param param
+	 * @return 
+	 */
+	private Map<String, Object> calculateNumShowAvgForAll(Map<String, Object> param) {
+		Integer countNum = 30;//设置统计期数
+		param.put("startNum", (Integer)param.get("endNum") - countNum + 1);//设置查询的起始数据
+		List<Map<String, Integer>> list = mapper.selectByColumn(param);
+		
+		//查询每期的数字最近出现的期数
+		Map<String, Object> subParam = new HashMap<String, Object>();
+		Integer sum = 0;
+		Integer count = 0;//统计只出现了一次的数字
+		List<Integer> numList = new ArrayList<Integer>();
+		for (Map<String, Integer> map : list) {
+			subParam.put("id", map.get("id"));
+			//计算每一个数值相隔期数
+			for (String column : map.keySet()) {
+				if ("id".equals(column)) continue;
+				subParam.put("num", map.get(column));
+				Map<String, Integer> lateMap = mapper.selectLateId(subParam);
+				
+				if (lateMap == null || lateMap.get("id") == null) {
+					count ++;
+				}else {
+					Integer a = map.get("id") - lateMap.get("id");
+					sum += a;
+					numList.add(a);
+				}
+			}
+		}
+		countNum -= count;
+		
+		Double avgNum = CommonUtil.getNumDecimal(Double.parseDouble(sum.toString())/Double.parseDouble(numList.size()+""), 2);
+		System.out.println("全表==>平均每："+avgNum+"期出现一次");
+		
+		//统计大于平均数的数量
+		int maxAvg = 0,minAvg = 0;
+		for (Integer i : numList) {
+			if (i>avgNum) {
+				maxAvg++;
+			}else {
+				minAvg++;
+			}
+		}
+		subParam.clear();
+		subParam.put("maxMore", maxAvg >= minAvg);
+		subParam.put("avg", avgNum);
+		return subParam;
+	}
+
+	/**
+	 * 计算和还有差的值
+	 * @param param
+	 * @param map
+	 */
+	private void sumAndDifferenceColumn(Map<String, Object> param,
+			Map<Integer, Map<String, Integer>> map) {
+		sumOrDifferenceColumn(param,map,false);//计算行与行之间的差值
+		sumOrDifferenceColumn(param,map,true);//计算行与行之间的和
+	}
+	
+	/**
+	 * 计算每两行之间的差值或和值
 	 * @param param
 	 * @param map 
 	 */
-	private void differenceColumn(Map<String, Object> param, Map<Integer, Map<String, Integer>> map) {
+	private void sumOrDifferenceColumn(Map<String, Object> param, Map<Integer, Map<String, Integer>> map,boolean isSum) {
 		Integer countNum = 25;//设置统计期数
 		param.put("startNum", (Integer)param.get("endNum") - countNum + 1);//设置查询的起始数据
 		String column = (String) param.get("column");//获取查询的列
@@ -199,18 +247,18 @@ public class JddDataServiceImpl implements JddDataService{
 		for (int i = list.size()-1; i >= 1 ; i--) {
 			Map<String, Integer> map1 = list.get(i);
 			Map<String, Integer> map2 = list.get(i-1);
-			Integer sub = map1.get(column) - map2.get(column);
-			if (sub < min) min = sub;
-			if (sub > max) max = sub; 
+			Integer val = isSum ? map1.get(column) + map2.get(column):map1.get(column) - map2.get(column);
+			if (val < min) min = val;
+			if (val > max) max = val; 
 		}
 		
-		//判断差值是否在范围之内
+		//判断差值或和值是否在范围之内
 		for (Integer num : map.keySet()) {
 			Map<String, Integer> numMap = map.get(num);
 			Map<String, Integer> preMap = list.get(list.size()-1);
-			Integer sub = num - preMap.get(column);
+			Integer val = isSum ? num + preMap.get(column) : num - preMap.get(column);
 			
-			numMap.put(Constant.COLUMN_SUB, sub >= min && sub <= max ? Constant.MATE_TRUE:Constant.MATE_FALSE);
+			numMap.put(Constant.COLUMN_SUB, val >= min && val <= max ? Constant.MATE_TRUE:Constant.MATE_FALSE);
 		}
 	}
 
@@ -226,7 +274,7 @@ public class JddDataServiceImpl implements JddDataService{
 			Map<String, Integer> numMap = map.get(num);
 			//查询该数据最近出现的一次
 			param.put("num", num);
-			Map<String, Integer> lateMap = mapper.selectLateByColumn(param);
+			Map<String, Integer> lateMap = mapper.selectLateId(param);
 			
 			//比较判断该数值
 			numMap.put(Constant.COLUMN_AVG, Constant.MATE_FALSE);
@@ -241,12 +289,12 @@ public class JddDataServiceImpl implements JddDataService{
 		return map;
 	}
 	/**
-	 * 计算近20期该列的数据平均多少期出现一次
+	 * 计算近30期该列的数据相对于列平均多少期出现一次
 	 * @param param
 	 * @return 
 	 */
 	private Map<String, Object> calculateNumShowAvg(Map<String, Object> param) {
-		Integer countNum = 20;//设置统计期数
+		Integer countNum = 30;//设置统计期数
 		param.put("startNum", (Integer)param.get("endNum") - countNum + 1);//设置查询的起始数据
 		String column = (String) param.get("column");//获取查询的列
 		List<Map<String, Integer>> list = mapper.selectByColumn(param);
@@ -260,7 +308,7 @@ public class JddDataServiceImpl implements JddDataService{
 			subParam.put("column", column);
 			subParam.put("id", map.get("id"));
 			subParam.put("num", map.get(column));
-			Map<String, Integer> lateMap = mapper.selectLateByColumn(subParam);
+			Map<String, Integer> lateMap = mapper.selectLateId(subParam);
 			
 			if (lateMap == null || lateMap.get("id") == null) {
 				count ++;

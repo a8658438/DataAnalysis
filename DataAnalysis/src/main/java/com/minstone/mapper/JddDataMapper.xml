@@ -290,9 +290,15 @@
   </select>
   
    <!-- 查询最近出现的数值 -->
-  <select id="selectLateByColumn" resultType="hashMap" parameterType="hashMap"  >
+  <select id="selectLateId" resultType="hashMap" parameterType="hashMap"  >
     <![CDATA[
-    	SELECT max(t.id) id FROM jdd_data t where t.id < #{id} and t.${column}=#{num}
+    	SELECT max(t.id) id FROM jdd_data t where t.id < #{id} 
     ]]>
+    <if test="column!=null and column!=''">
+    	and t.${column}=#{num}
+    </if>
+    <if test="column==null">
+    	and (t.one=#{num} or t.two=#{num} or t.three=#{num} or t.four=#{num} or t.five=#{num} or t.six=#{num})
+    </if>
   </select>
 </mapper>
