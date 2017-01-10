@@ -32,7 +32,7 @@ public class JddDataTest {
 	@Test
 	public void test1() {
 		JddDataService service = (JddDataService) context.getBean(JddDataService.class);
-		service.getMaybeNumbers(154);
+		service.getMaybeNumbers(151);
 	}
 	
 	@Test

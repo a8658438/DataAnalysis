@@ -113,6 +113,7 @@ public class JddDataServiceImpl implements JddDataService{
 				numResu.put(Constant.MAX_MIN, maxAndMin.get("max_"+column) >= j && j >= maxAndMin.get("min_"+column) ? 1 : 0);
 				result.put(j, numResu);
 				
+				//这里打印数据只是为了方便查看，与真正的统计无关
 				if (rangeScale.get("min") <= j && j <= rangeScale.get("max")) 
 					System.out.println("数字："+j+"==>属于近"+stageNum+"期热门区间:"+rangeScale.get("min")+"-"+rangeScale.get("max")+"==>热门率："+rangeScale.get("percent"));
 				
@@ -128,7 +129,7 @@ public class JddDataServiceImpl implements JddDataService{
 	public Result getMaybeNumbers(Integer num) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("endNum", num - 1);
-		param.put("column", Constant.ONE);
+		param.put("column", Constant.TWO);
 		param.put("id", num);
 		Map<Integer, Map<String, Integer>> map = countColumnProbabilityAndRange(param);
 		map = compareAvg(map, param);//比对列出现频率
@@ -136,9 +137,156 @@ public class JddDataServiceImpl implements JddDataService{
 		
 		//比对每期的出现频率
 		compareAllAvg(map, param);
+		//统计每个数字N期出现一次的概率
+		countAllProbability(param,map);
+		
+		//分析每个数字的概率
+		analysisNumChance(map);
 		return Result.ok();
 	}
 
+	/**
+	 * 分析每个数字的概率
+	 * @param map
+	 */
+	private void analysisNumChance(Map<Integer, Map<String, Integer>> map) {
+		for (Integer number : map.keySet()) {
+			Map<String, Integer> numMap = map.get(number);
+//			for (String key : numMap.keySet()) {
+//				System.out.println("数字："+number+"==>键："+key+"==>值："+numMap.get(key));
+//			}
+			//分摊 late_all占比35%，其他占比55%
+			Double lateAllScale = CommonUtil.getNumDecimal(statisLateAllScale(numMap), 2);//计算lateAll所占比例
+			Double otherScale = CommonUtil.getNumDecimal(statisOtherScale(numMap), 2);;//计算其他数值的占比
+			//符合最大最小区间的直接加成10%
+			Double maxMinScale = numMap.get(Constant.MAX_MIN) == 1 ? 10d : 0d; 
+			numMap.remove(Constant.MAX_MIN);
+			
+			Double scale = CommonUtil.getNumDecimal(lateAllScale+otherScale+maxMinScale,2);
+			System.out.println("数字："+number +"==>概率："+scale+"(其中lateAll占比："+lateAllScale+";other占比："+otherScale+")");
+			
+		}
+	}
+
+	/**
+	 * 计算其他数值的占比
+	 * @param numMap
+	 * @return 
+	 */
+	private Double statisOtherScale(Map<String, Integer> numMap) {
+		Double lateAllScale = 55d;//占比60
+		//计算符合的条件个数
+		Double count = 0d;
+		count += numMap.get(Constant.COLUMN_SUB);//列差值是否符合
+		count += numMap.get(Constant.COLUMN_AND);//列和值是否符合
+		count += numMap.get(Constant.ALL_AVG);//全表平均频率出现值是否符合
+//		count += numMap.get(Constant.MAX_MIN);//取值范围是否符合
+		count += numMap.get(Constant.COLUMN_AVG);//列平均频率出现值是否符合
+		//如果不属于近5期的热门区间+1
+		count += numMap.get(Constant.LATE_RANGE_5) != 0 ? -1 : 0;
+		//如果属于近10期热门期间+1
+		count += numMap.get(Constant.LATE_RANGE_10) != 0 ? 1 : 0;
+		//如果属于近20期热门期间+1
+		count += numMap.get(Constant.LATE_RANGE_20) != 0 ? 1 : 0;
+		//如果属于近30期热门期间+1
+		count += numMap.get(Constant.LATE_RANGE_30) != 0 ? 1 : 0;
+		
+		//近5期出现过的将下次出现的概率-1
+		count += numMap.get(Constant.LATE_5) != 0 ? -1 : 0;
+		count += numMap.get(Constant.LATE_10) != 0 ? 1 : 0;
+		count += numMap.get(Constant.LATE_20) != 0 ? 1 : 0;
+		count += numMap.get(Constant.LATE_30) != 0 ? 1 : 0;
+		
+		//计算比例
+		Double scale = count / numMap.keySet().size() * lateAllScale;
+		return scale;
+	}
+
+	/**
+	 * 计算lateAll所占比例
+	 * @param numMap
+	 * @return
+	 */
+	private Double statisLateAllScale(Map<String, Integer> numMap) {
+		Double lateAllScale = 35d;
+		//关于late_all介绍：当前数字在越小的期内出现过时，则取最小期的概率做统计
+		Integer lateAll1 = numMap.get(Constant.LATE_ALL_1),lateAll5 = numMap.get(Constant.LATE_ALL_5),
+				lateAll10 = numMap.get(Constant.LATE_ALL_10),lateAll20 = numMap.get(Constant.LATE_ALL_20);
+		//该数字在该期可能会出现的比例
+		Integer maybeShowScale = lateAll1 != 0 ? lateAll1 : lateAll5 != 0 ? lateAll5 : lateAll10!=0 ? lateAll10 : lateAll20;
+		//该比例占比为
+		lateAllScale = lateAllScale * Double.parseDouble(maybeShowScale.toString()) / 100;
+		
+		numMap.remove(Constant.LATE_ALL_1);
+		numMap.remove(Constant.LATE_ALL_5);
+		numMap.remove(Constant.LATE_ALL_10);
+		numMap.remove(Constant.LATE_ALL_20);
+		
+		return lateAllScale;
+	}
+
+	/**
+	 * 取25行数据做范本，统计每个数字连续期数出现的概率，5期出现一次的概率，10期出现一次的概率，20期出现一次的概率
+	 * @param param
+	 * @param map 
+	 * @param map
+	 */
+	private void countAllProbability(Map<String, Object> param, Map<Integer, Map<String, Integer>> map) {
+		Integer countNum = 25;//设置统计期数范本数据
+		param.put("startNum", (Integer)param.get("endNum") - countNum + 1);//设置查询的起始数据
+		List<Map<String, Integer>> list = mapper.selectByColumn(param);//查询多行数据
+		Integer quantum = list.size() * 6;//统计的数字数量
+	
+		//查询每一行的每个数字的的概率
+		Map<String, Object> subParam = new HashMap<String, Object>();
+		for (int i = 0; i < 4; i++) {//循环2期、5期、10期、20期
+			Integer stageNum = i == 0?Constant.NUM_1:i==1?Constant.NUM_5:i==2?Constant.NUM_10:Constant.NUM_20;
+			//查询有多少个数字是符合条件了的 
+			Integer hasNum = queryNumFrequency(list, subParam, stageNum);
+			//计算N期内会出现的概率
+			Double divi = Double.parseDouble(hasNum.toString()) / Double.parseDouble(quantum.toString()) * 100;
+			divi = CommonUtil.getNumDecimal(divi, 2);
+			System.out.println("在"+stageNum+"期内，数字出现的概率为："+divi);
+			
+			//统计指定期数
+			subParam.put("startNum", (Integer)param.get("endNum") - stageNum + 1);
+			subParam.put("endNum", (Integer)param.get("endNum"));
+			for (Integer num : map.keySet()) {
+				subParam.put("num", num);
+				Map<String, Integer> numMap = map.get(num);
+				List<Map<String, Integer>> hasList = mapper.selectIsShowId(subParam);
+				
+				//如果前N期出过了，那么本期可能出现的概率则为该期的概率
+				numMap.put("late_all_"+stageNum, Constant.MATE_FALSE);
+				if (hasList != null && hasList.size() != 0) 
+					numMap.put("late_all_"+stageNum,divi.intValue());
+					
+			}
+		}
+	}
+
+	/**
+	 * 查询指定期数有多少个数字是出现了的
+	 * @param list
+	 * @param subParam
+	 * @param stageNum
+	 * @return 
+	 */
+	private Integer queryNumFrequency(List<Map<String, Integer>> list,Map<String, Object> subParam, Integer stageNum) {
+		Integer hasNum = 0;//存在的次数
+		for (Map<String, Integer> map2 : list) {//循环每一行查询
+			subParam.put("endNum", map2.get("id")-1);//查询前一期
+			subParam.put("startNum", map2.get("id") - stageNum);//设置起始数据
+			
+			for (String key : map2.keySet()) {//循环每个数字查询
+				subParam.put("num", map2.get(key));
+				List<Map<String, Integer>> hasList = mapper.selectIsShowId(subParam);
+				//如果有数据表示存在
+				if (hasList != null && hasList.size() != 0) hasNum++;
+			}
+		}
+		return hasNum;
+	}
 	/**
 	 * 比对每期的出现频率
 	 * @param map
@@ -258,7 +406,7 @@ public class JddDataServiceImpl implements JddDataService{
 			Map<String, Integer> preMap = list.get(list.size()-1);
 			Integer val = isSum ? num + preMap.get(column) : num - preMap.get(column);
 			
-			numMap.put(Constant.COLUMN_SUB, val >= min && val <= max ? Constant.MATE_TRUE:Constant.MATE_FALSE);
+			numMap.put(isSum ? Constant.COLUMN_AND : Constant.COLUMN_SUB, val >= min && val <= max ? Constant.MATE_TRUE:Constant.MATE_FALSE);
 		}
 	}
 

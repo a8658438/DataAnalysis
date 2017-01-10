@@ -30,9 +30,9 @@
 		</tx:attributes>
 	</tx:advice>
 	<!-- 切面 -->
-	<aop:config>
+	<!-- <aop:config>
 		<aop:advisor advice-ref="txAdvice"
 			pointcut="execution(* com.minstone.service.*.*(..))" />
-	</aop:config>
+	</aop:config> -->
 
 </beans>

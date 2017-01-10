@@ -301,4 +301,11 @@
     	and (t.one=#{num} or t.two=#{num} or t.three=#{num} or t.four=#{num} or t.five=#{num} or t.six=#{num})
     </if>
   </select>
+  
+   <!-- 查询某个数字在在指定期数间是否出现过 -->
+  <select id="selectIsShowId" resultType="hashMap" parameterType="hashMap"  >
+    SELECT t.id FROM jdd_data t 
+    <include refid="between_id" />
+    and (t.one=#{num} or t.two=#{num} or t.three=#{num} or t.four=#{num} or t.five=#{num} or t.six=#{num})
+  </select>
 </mapper>

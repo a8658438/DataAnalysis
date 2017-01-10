@@ -20,6 +20,7 @@ public class Constant {
 	public static String FIVE = "five";
 	public static String SIX = "six";
 	
+	public static Integer NUM_1 = 1;
 	public static Integer NUM_5 = 5;
 	public static Integer NUM_10 = 10;
 	public static Integer NUM_20 = 20;
@@ -64,4 +65,12 @@ public class Constant {
 	 * 表出现的频率
 	 */
 	public static String ALL_AVG = "all_avg";
+	
+	/**
+	 * 近5期
+	 */
+	public static String LATE_ALL_1 = "late_all_1";
+	public static String LATE_ALL_5 = "late_all_5";
+	public static String LATE_ALL_10 = "late_all_10";
+	public static String LATE_ALL_20 = "late_all_20";
 }
