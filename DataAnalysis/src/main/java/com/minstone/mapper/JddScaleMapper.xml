@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taotao.mapper.JddScaleMapper" >
+  <resultMap id="BaseResultMap" type="com.taotao.pojo.JddScale" >
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="late_all_scale" property="lateAllScale" jdbcType="INTEGER" />
+    <result column="other_scale" property="otherScale" jdbcType="INTEGER" />
+    <result column="column_avg_level" property="columnAvgLevel" jdbcType="INTEGER" />
+    <result column="all_avg_level" property="allAvgLevel" jdbcType="INTEGER" />
+    <result column="column_name" property="columnName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    num, late_all_scale, other_scale, column_avg_level, all_avg_level, column_name
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.taotao.pojo.JddScaleExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from jdd_scale
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.taotao.pojo.JddScaleExample" >
+    delete from jdd_scale
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.taotao.pojo.JddScale" >
+    insert into jdd_scale (num, late_all_scale, other_scale, 
+      column_avg_level, all_avg_level, column_name
+      )
+    values (#{num,jdbcType=INTEGER}, #{lateAllScale,jdbcType=INTEGER}, #{otherScale,jdbcType=INTEGER}, 
+      #{columnAvgLevel,jdbcType=INTEGER}, #{allAvgLevel,jdbcType=INTEGER}, #{columnName,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.taotao.pojo.JddScale" >
+    insert into jdd_scale
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="lateAllScale != null" >
+        late_all_scale,
+      </if>
+      <if test="otherScale != null" >
+        other_scale,
+      </if>
+      <if test="columnAvgLevel != null" >
+        column_avg_level,
+      </if>
+      <if test="allAvgLevel != null" >
+        all_avg_level,
+      </if>
+      <if test="columnName != null" >
+        column_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="lateAllScale != null" >
+        #{lateAllScale,jdbcType=INTEGER},
+      </if>
+      <if test="otherScale != null" >
+        #{otherScale,jdbcType=INTEGER},
+      </if>
+      <if test="columnAvgLevel != null" >
+        #{columnAvgLevel,jdbcType=INTEGER},
+      </if>
+      <if test="allAvgLevel != null" >
+        #{allAvgLevel,jdbcType=INTEGER},
+      </if>
+      <if test="columnName != null" >
+        #{columnName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.taotao.pojo.JddScaleExample" resultType="java.lang.Integer" >
+    select count(*) from jdd_scale
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update jdd_scale
+    <set >
+      <if test="record.num != null" >
+        num = #{record.num,jdbcType=INTEGER},
+      </if>
+      <if test="record.lateAllScale != null" >
+        late_all_scale = #{record.lateAllScale,jdbcType=INTEGER},
+      </if>
+      <if test="record.otherScale != null" >
+        other_scale = #{record.otherScale,jdbcType=INTEGER},
+      </if>
+      <if test="record.columnAvgLevel != null" >
+        column_avg_level = #{record.columnAvgLevel,jdbcType=INTEGER},
+      </if>
+      <if test="record.allAvgLevel != null" >
+        all_avg_level = #{record.allAvgLevel,jdbcType=INTEGER},
+      </if>
+      <if test="record.columnName != null" >
+        column_name = #{record.columnName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update jdd_scale
+    set num = #{record.num,jdbcType=INTEGER},
+      late_all_scale = #{record.lateAllScale,jdbcType=INTEGER},
+      other_scale = #{record.otherScale,jdbcType=INTEGER},
+      column_avg_level = #{record.columnAvgLevel,jdbcType=INTEGER},
+      all_avg_level = #{record.allAvgLevel,jdbcType=INTEGER},
+      column_name = #{record.columnName,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  
+  
+  <delete id="deleteColumnData" parameterType="string">
+  	DELETE from jdd_scale t where t.column_name=#{column}
+  </delete>
+</mapper>
