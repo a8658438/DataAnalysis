@@ -27,9 +27,9 @@ public interface JddDataService {
 	Map<Integer, Map<String, Integer>> countColumnProbabilityAndRange(Map<String, Object> param);
 	
 	/**
-	 * 获取某一期可能出现的6个数字
+	 * 获取每个数字在各列中的数据
 	 * @param num
 	 * @return
 	 */
-	Result getMaybeNumbers(Integer num);
+	Map<Integer, Map<String, Integer>> getNumbersDataForColumn(Integer num,String column);
 }

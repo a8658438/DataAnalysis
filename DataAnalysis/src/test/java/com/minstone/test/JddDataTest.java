@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.minstone.service.JddDataService;
+import com.minstone.util.Constant;
 
 public class JddDataTest {
 	ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring/applicationContext-*.xml");
@@ -32,7 +33,10 @@ public class JddDataTest {
 	@Test
 	public void test1() {
 		JddDataService service = (JddDataService) context.getBean(JddDataService.class);
-		service.getMaybeNumbers(151);
+		//获取每列的数字信息
+		Map<Integer, Map<String, Integer>> numberData = service.getNumbersDataForColumn(151,Constant.ONE);
+		//保存进数据库
+		
 	}
 	
 	@Test

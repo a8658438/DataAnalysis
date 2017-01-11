@@ -27,6 +27,26 @@ public class JddDataServiceImpl implements JddDataService{
 	private JddDataMapper mapper;
 
 	@Override
+	public Map<Integer, Map<String, Integer>> getNumbersDataForColumn(Integer num,String column) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("endNum", num - 1);
+		param.put("column", column);
+		param.put("id", num);
+		Map<Integer, Map<String, Integer>> map = countColumnProbabilityAndRange(param);
+		map = compareAvg(map, param);//比对列出现频率
+		sumAndDifferenceColumn(param, map);//计算列的和与差之值
+		
+		//比对每期的出现频率
+		compareAllAvg(map, param);
+		//统计每个数字N期出现一次的概率
+		countAllProbability(param,map);
+		
+		//分析每个数字的概率
+		analysisNumChance(map);
+		return map;
+	}
+	
+	@Override
 	public List<Map<String, Long>> selectSumByStage(Map<String , Object> param) {
 		List<Map<String,Long>> list = mapper.selectSumByStage(param);
 //		for (Map<String, Long> map : list) {
@@ -125,26 +145,6 @@ public class JddDataServiceImpl implements JddDataService{
 	}
 	
 
-	@Override
-	public Result getMaybeNumbers(Integer num) {
-		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("endNum", num - 1);
-		param.put("column", Constant.TWO);
-		param.put("id", num);
-		Map<Integer, Map<String, Integer>> map = countColumnProbabilityAndRange(param);
-		map = compareAvg(map, param);//比对列出现频率
-		sumAndDifferenceColumn(param, map);//计算列的和与差之值
-		
-		//比对每期的出现频率
-		compareAllAvg(map, param);
-		//统计每个数字N期出现一次的概率
-		countAllProbability(param,map);
-		
-		//分析每个数字的概率
-		analysisNumChance(map);
-		return Result.ok();
-	}
-
 	/**
 	 * 分析每个数字的概率
 	 * @param map
@@ -152,18 +152,14 @@ public class JddDataServiceImpl implements JddDataService{
 	private void analysisNumChance(Map<Integer, Map<String, Integer>> map) {
 		for (Integer number : map.keySet()) {
 			Map<String, Integer> numMap = map.get(number);
-//			for (String key : numMap.keySet()) {
-//				System.out.println("数字："+number+"==>键："+key+"==>值："+numMap.get(key));
-//			}
 			//分摊 late_all占比35%，其他占比55%
-			Double lateAllScale = CommonUtil.getNumDecimal(statisLateAllScale(numMap), 2);//计算lateAll所占比例
-			Double otherScale = CommonUtil.getNumDecimal(statisOtherScale(numMap), 2);;//计算其他数值的占比
-			//符合最大最小区间的直接加成10%
-			Double maxMinScale = numMap.get(Constant.MAX_MIN) == 1 ? 10d : 0d; 
-			numMap.remove(Constant.MAX_MIN);
+			Double lateAllScale = CommonUtil.getNumDecimal(statisLateAllScale(numMap), 2) * 100;//计算lateAll所占比例
+			Double otherScale = CommonUtil.getNumDecimal(statisOtherScale(numMap), 2) * 100;//计算其他数值的占比
 			
-			Double scale = CommonUtil.getNumDecimal(lateAllScale+otherScale+maxMinScale,2);
-			System.out.println("数字："+number +"==>概率："+scale+"(其中lateAll占比："+lateAllScale+";other占比："+otherScale+")");
+			numMap.put(Constant.LATE_ALL_SCALE, lateAllScale.intValue());
+			numMap.put(Constant.OTHER_SCALE, otherScale.intValue());
+//			Double scale = CommonUtil.getNumDecimal(lateAllScale+otherScale,2);
+//			System.out.println("数字："+number +"==>概率："+scale+"(其中lateAll占比："+lateAllScale+";other占比："+otherScale+")");
 			
 		}
 	}
@@ -180,7 +176,7 @@ public class JddDataServiceImpl implements JddDataService{
 		count += numMap.get(Constant.COLUMN_SUB);//列差值是否符合
 		count += numMap.get(Constant.COLUMN_AND);//列和值是否符合
 		count += numMap.get(Constant.ALL_AVG);//全表平均频率出现值是否符合
-//		count += numMap.get(Constant.MAX_MIN);//取值范围是否符合
+		count += numMap.get(Constant.MAX_MIN);//取值范围是否符合
 		count += numMap.get(Constant.COLUMN_AVG);//列平均频率出现值是否符合
 		//如果不属于近5期的热门区间+1
 		count += numMap.get(Constant.LATE_RANGE_5) != 0 ? -1 : 0;
@@ -198,7 +194,8 @@ public class JddDataServiceImpl implements JddDataService{
 		count += numMap.get(Constant.LATE_30) != 0 ? 1 : 0;
 		
 		//计算比例
-		Double scale = count / numMap.keySet().size() * lateAllScale;
+//		Double scale = count / numMap.keySet().size() * lateAllScale;
+		Double scale = count / 13;
 		return scale;
 	}
 
@@ -215,7 +212,8 @@ public class JddDataServiceImpl implements JddDataService{
 		//该数字在该期可能会出现的比例
 		Integer maybeShowScale = lateAll1 != 0 ? lateAll1 : lateAll5 != 0 ? lateAll5 : lateAll10!=0 ? lateAll10 : lateAll20;
 		//该比例占比为
-		lateAllScale = lateAllScale * Double.parseDouble(maybeShowScale.toString()) / 100;
+//		lateAllScale = lateAllScale * Double.parseDouble(maybeShowScale.toString()) / 100;
+		lateAllScale = Double.parseDouble(maybeShowScale.toString()) / 100;
 		
 		numMap.remove(Constant.LATE_ALL_1);
 		numMap.remove(Constant.LATE_ALL_5);
@@ -304,6 +302,8 @@ public class JddDataServiceImpl implements JddDataService{
 			subParam.put("num", num);
 			Map<String, Integer> lateMap = mapper.selectLateId(subParam);
 			
+			//获取频率等级
+			numMap.put(Constant.ALL_AVG_LEVEL, (Integer) (avgMap.get(num.toString()) == null ? 0 : avgMap.get(num.toString())));
 			//比较判断该数值
 			numMap.put(Constant.ALL_AVG, Constant.MATE_FALSE);
 			if (lateMap != null && lateMap.get("id") != null) {
@@ -345,6 +345,7 @@ public class JddDataServiceImpl implements JddDataService{
 					Integer a = map.get("id") - lateMap.get("id");
 					sum += a;
 					numList.add(a);
+					subParam.put(a.toString(), subParam.get(a.toString()) == null ? 1 : (Integer)subParam.get(a.toString())+1);
 				}
 			}
 		}
@@ -362,7 +363,6 @@ public class JddDataServiceImpl implements JddDataService{
 				minAvg++;
 			}
 		}
-		subParam.clear();
 		subParam.put("maxMore", maxAvg >= minAvg);
 		subParam.put("avg", avgNum);
 		return subParam;
@@ -424,6 +424,8 @@ public class JddDataServiceImpl implements JddDataService{
 			param.put("num", num);
 			Map<String, Integer> lateMap = mapper.selectLateId(param);
 			
+			//设置该数字等级
+			numMap.put(Constant.COLUMN_AVG_LEVEL, (Integer) (avgMap.get(num.toString()) == null ? 0 : avgMap.get(num.toString())));
 			//比较判断该数值
 			numMap.put(Constant.COLUMN_AVG, Constant.MATE_FALSE);
 			if (lateMap != null && lateMap.get("id") != null) {
@@ -464,6 +466,9 @@ public class JddDataServiceImpl implements JddDataService{
 				Integer a = map.get("id") - lateMap.get("id");
 				sum += a;
 				numList.add(a);
+				
+				//统计各个数字出现的次数
+				subParam.put(a.toString(), subParam.get(a.toString()) == null ? 1 : (Integer)subParam.get(a.toString())+1);
 			}
 		}
 		countNum -= count;
@@ -480,7 +485,6 @@ public class JddDataServiceImpl implements JddDataService{
 				minAvg++;
 			}
 		}
-		subParam.clear();
 		subParam.put("maxMore", maxAvg >= minAvg);
 		subParam.put("avg", avgNum);
 		

@@ -53,6 +53,10 @@ public class Constant {
 	 */
 	public static String COLUMN_AVG = "column_avg";
 	/**
+	 * 列出现的等级
+	 */
+	public static String COLUMN_AVG_LEVEL = "column_avg_level";
+	/**
 	 * 列与列之间的差值
 	 */
 	public static String COLUMN_SUB = "column_sub";
@@ -65,6 +69,10 @@ public class Constant {
 	 * 表出现的频率
 	 */
 	public static String ALL_AVG = "all_avg";
+	/**
+	 * 表出现的频率等级
+	 */
+	public static String ALL_AVG_LEVEL = "all_avg_level";
 	
 	/**
 	 * 近5期
@@ -73,4 +81,14 @@ public class Constant {
 	public static String LATE_ALL_5 = "late_all_5";
 	public static String LATE_ALL_10 = "late_all_10";
 	public static String LATE_ALL_20 = "late_all_20";
+	
+	
+	/**
+	 * 表的概率
+	 */
+	public static String LATE_ALL_SCALE = "late_all_scale";
+	/**
+	 * 其他的概率
+	 */
+	public static String OTHER_SCALE = "other_scale";
 }
