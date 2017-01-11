@@ -20,7 +20,7 @@ public class JddScaleServiceImpl implements JddScaleService {
 	@Override
 	public void saveBatch(Map<Integer, Map<String, Integer>> numberData,String column) {
 		//插入前先清空该列数据
-//		mapper.deleteColumnData(column);
+		mapper.deleteColumnData(column);
 		
 		//循环插入数据
 		for (Integer num : numberData.keySet()) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.taotao.mapper.JddScaleMapper" >
-  <resultMap id="BaseResultMap" type="com.taotao.pojo.JddScale" >
+<mapper namespace="com.minstone.mapper.JddScaleMapper" >
+  <resultMap id="BaseResultMap" type="com.minstone.pojo.JddScale" >
     <result column="num" property="num" jdbcType="INTEGER" />
     <result column="late_all_scale" property="lateAllScale" jdbcType="INTEGER" />
     <result column="other_scale" property="otherScale" jdbcType="INTEGER" />
@@ -70,7 +70,7 @@
   <sql id="Base_Column_List" >
     num, late_all_scale, other_scale, column_avg_level, all_avg_level, column_name
   </sql>
-  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.taotao.pojo.JddScaleExample" >
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.minstone.pojo.JddScaleExample" >
     select
     <if test="distinct" >
       distinct
@@ -84,13 +84,13 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="com.taotao.pojo.JddScaleExample" >
+  <delete id="deleteByExample" parameterType="com.minstone.pojo.JddScaleExample" >
     delete from jdd_scale
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.taotao.pojo.JddScale" >
+  <insert id="insert" parameterType="com.minstone.pojo.JddScale" >
     insert into jdd_scale (num, late_all_scale, other_scale, 
       column_avg_level, all_avg_level, column_name
       )
@@ -98,7 +98,7 @@
       #{columnAvgLevel,jdbcType=INTEGER}, #{allAvgLevel,jdbcType=INTEGER}, #{columnName,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.taotao.pojo.JddScale" >
+  <insert id="insertSelective" parameterType="com.minstone.pojo.JddScale" >
     insert into jdd_scale
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="num != null" >
@@ -141,7 +141,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.taotao.pojo.JddScaleExample" resultType="java.lang.Integer" >
+  <select id="countByExample" parameterType="com.minstone.pojo.JddScaleExample" resultType="java.lang.Integer" >
     select count(*) from jdd_scale
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
@@ -186,8 +186,143 @@
     </if>
   </update>
   
-  
+  <!-- 删除某一列的数据 -->
   <delete id="deleteColumnData" parameterType="string">
-  	DELETE from jdd_scale t where t.column_name=#{column}
+  	DELETE from jdd_scale where column_name=#{column}
   </delete>
+  
+  <!-- 统计各列的概率排行 -->
+  <select id="queryColumnRank" parameterType="string">
+  	SELECT
+		*
+	FROM
+		(
+			SELECT
+				s1.num,
+				s1.rownum1 + s2.rownum2 + s3.rownum3 + s4.rownum4 AS rownum
+			FROM
+				(
+					SELECT
+						obj1.num,
+						obj1.late_all_scale,
+						CASE
+					WHEN @rowtotal1 = obj1.late_all_scale THEN
+						@rownum1
+					WHEN @rowtotal1 := obj1.late_all_scale THEN
+						@rownum1 :=@rownum1 + 1
+					WHEN @rowtotal1 = 0 THEN
+						@rownum1 :=@rownum1 + 1
+					END AS rownum1
+					FROM
+						(
+							SELECT
+								num,
+								late_all_scale
+							FROM
+								jdd_scale t1
+							WHERE
+								t1.column_name = #{column}
+							ORDER BY
+								t1.late_all_scale DESC
+						) AS obj1,
+						(
+							SELECT
+								@rownum1 := 0 ,@rowtotal1 := NULL
+						) AS r1
+				) s1,
+				(
+					SELECT
+						obj2.num,
+						obj2.other_scale,
+						CASE
+					WHEN @rowtotal2 = obj2.other_scale THEN
+						@rownum2
+					WHEN @rowtotal2 := obj2.other_scale THEN
+						@rownum2 :=@rownum2 + 1
+					WHEN @rowtotal2 = 0 THEN
+						@rownum2 :=@rownum2 + 1
+					END AS rownum2
+					FROM
+						(
+							SELECT
+								num,
+								other_scale
+							FROM
+								jdd_scale t2
+							WHERE
+								t2.column_name = #{column}
+							ORDER BY
+								t2.other_scale DESC
+						) AS obj2,
+						(
+							SELECT
+								@rownum2 := 0 ,@rowtotal2 := NULL
+						) AS r2
+				) s2,
+				(
+					SELECT
+						obj3.num,
+						obj3.all_avg_level,
+						CASE
+					WHEN @rowtotal3 = obj3.all_avg_level THEN
+						@rownum3
+					WHEN @rowtotal3 := obj3.all_avg_level THEN
+						@rownum3 :=@rownum3 + 1
+					WHEN @rowtotal3 = 0 THEN
+						@rownum3 :=@rownum3 + 1
+					END AS rownum3
+					FROM
+						(
+							SELECT
+								num,
+								all_avg_level
+							FROM
+								jdd_scale t3
+							WHERE
+								t3.column_name = #{column}
+							ORDER BY
+								t3.all_avg_level DESC
+						) AS obj3,
+						(
+							SELECT
+								@rownum3 := 0 ,@rowtotal3 := NULL
+						) AS r3
+				) s3,
+				(
+					SELECT
+						obj4.num,
+						obj4.column_avg_level,
+						CASE
+					WHEN @rowtotal4 = obj4.column_avg_level THEN
+						@rownum4
+					WHEN @rowtotal4 := obj4.column_avg_level THEN
+						@rownum4 :=@rownum4 + 1
+					WHEN @rowtotal4 = 0 THEN
+						@rownum4 :=@rownum4 + 1
+					END AS rownum4
+					FROM
+						(
+							SELECT
+								num,
+								column_avg_level
+							FROM
+								jdd_scale t4
+							WHERE
+								t4.column_name = #{column}
+							ORDER BY
+								t4.column_avg_level DESC
+						) AS obj4,
+						(
+							SELECT
+								@rownum4 := 0 ,@rowtotal4 := NULL
+						) r4
+				) s4
+			WHERE
+				s1.num = s2.num
+			AND s1.num = s3.num
+			AND s1.num = s4.num
+		) AS s5
+	ORDER BY
+		s5.rownum ASC
+  </select>
 </mapper>

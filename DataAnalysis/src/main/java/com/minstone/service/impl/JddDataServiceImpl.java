@@ -153,8 +153,8 @@ public class JddDataServiceImpl implements JddDataService{
 		for (Integer number : map.keySet()) {
 			Map<String, Integer> numMap = map.get(number);
 			//分摊 late_all占比35%，其他占比55%
-			Double lateAllScale = CommonUtil.getNumDecimal(statisLateAllScale(numMap), 2) * 100;//计算lateAll所占比例
-			Double otherScale = CommonUtil.getNumDecimal(statisOtherScale(numMap), 2) * 100;//计算其他数值的占比
+			Double lateAllScale = CommonUtil.getNumDecimal(statisLateAllScale(numMap), 4) * 10000;//计算lateAll所占比例
+			Double otherScale = CommonUtil.getNumDecimal(statisOtherScale(numMap), 4) * 10000;//计算其他数值的占比
 			
 			numMap.put(Constant.LATE_ALL_SCALE, lateAllScale.intValue());
 			numMap.put(Constant.OTHER_SCALE, otherScale.intValue());

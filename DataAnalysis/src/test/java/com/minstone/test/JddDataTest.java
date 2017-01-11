@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.minstone.service.JddDataService;
+import com.minstone.service.JddScaleService;
 import com.minstone.util.Constant;
 
 public class JddDataTest {
@@ -32,11 +33,12 @@ public class JddDataTest {
 	
 	@Test
 	public void test1() {
-		JddDataService service = (JddDataService) context.getBean(JddDataService.class);
+		JddDataService service = context.getBean(JddDataService.class);
+		JddScaleService scaleService = context.getBean(JddScaleService.class);
 		//获取每列的数字信息
 		Map<Integer, Map<String, Integer>> numberData = service.getNumbersDataForColumn(151,Constant.ONE);
 		//保存进数据库
-		
+		scaleService.saveBatch(numberData, Constant.ONE);
 	}
 	
 	@Test
