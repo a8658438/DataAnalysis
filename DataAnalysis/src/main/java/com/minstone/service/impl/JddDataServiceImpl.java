@@ -61,7 +61,7 @@ public class JddDataServiceImpl implements JddDataService{
 		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
 		for (Map<String, Long> map : list) {
 			int currentNum = Integer.parseInt(map.get(param.get("column"))+"");//当前数字
-			Double divi = Double.parseDouble(param.get("countNum").toString());//期数
+			Double divi = Double.parseDouble(param.get("countNum").toString());//统计了N期
 			//统计各个数值出现的概率
 			Integer  d = (int) (Double.parseDouble(map.get("count_num").toString()) / divi *100);
 			System.out.println("数字："+currentNum+"==>比例："+d);
@@ -179,7 +179,7 @@ public class JddDataServiceImpl implements JddDataService{
 		count += numMap.get(Constant.MAX_MIN);//取值范围是否符合
 		count += numMap.get(Constant.COLUMN_AVG);//列平均频率出现值是否符合
 		//如果不属于近5期的热门区间+1
-		count += numMap.get(Constant.LATE_RANGE_5) != 0 ? -1 : 0;
+		count += numMap.get(Constant.LATE_RANGE_5) != 0 ? 1 : 0;
 		//如果属于近10期热门期间+1
 		count += numMap.get(Constant.LATE_RANGE_10) != 0 ? 1 : 0;
 		//如果属于近20期热门期间+1
@@ -188,7 +188,7 @@ public class JddDataServiceImpl implements JddDataService{
 		count += numMap.get(Constant.LATE_RANGE_30) != 0 ? 1 : 0;
 		
 		//近5期出现过的将下次出现的概率-1
-		count += numMap.get(Constant.LATE_5) != 0 ? -1 : 0;
+		count += numMap.get(Constant.LATE_5) != 0 ? 1 : 0;
 		count += numMap.get(Constant.LATE_10) != 0 ? 1 : 0;
 		count += numMap.get(Constant.LATE_20) != 0 ? 1 : 0;
 		count += numMap.get(Constant.LATE_30) != 0 ? 1 : 0;
@@ -301,9 +301,11 @@ public class JddDataServiceImpl implements JddDataService{
 			//查询该数据最近出现的一次
 			subParam.put("num", num);
 			Map<String, Integer> lateMap = mapper.selectLateId(subParam);
+			//计算上次出现和这次出现相差多少期
+			Integer lateNum = (Integer)param.get("id") - (lateMap !=null && lateMap.get("id") !=null?lateMap.get("id"):9999);
 			
 			//获取频率等级
-			numMap.put(Constant.ALL_AVG_LEVEL, (Integer) (avgMap.get(num.toString()) == null ? 0 : avgMap.get(num.toString())));
+			numMap.put(Constant.ALL_AVG_LEVEL, (Integer) (avgMap.get(lateNum.toString()) == null ? 0 : avgMap.get(lateNum.toString())));
 			//比较判断该数值
 			numMap.put(Constant.ALL_AVG, Constant.MATE_FALSE);
 			if (lateMap != null && lateMap.get("id") != null) {
@@ -423,9 +425,9 @@ public class JddDataServiceImpl implements JddDataService{
 			//查询该数据最近出现的一次
 			param.put("num", num);
 			Map<String, Integer> lateMap = mapper.selectLateId(param);
-			
+			Integer lateNum = (Integer)param.get("id") - (lateMap !=null && lateMap.get("id") !=null?lateMap.get("id"):9999);
 			//设置该数字等级
-			numMap.put(Constant.COLUMN_AVG_LEVEL, (Integer) (avgMap.get(num.toString()) == null ? 0 : avgMap.get(num.toString())));
+			numMap.put(Constant.COLUMN_AVG_LEVEL, (Integer) (avgMap.get(lateNum.toString()) == null ? 0 : avgMap.get(lateNum.toString())));
 			//比较判断该数值
 			numMap.put(Constant.COLUMN_AVG, Constant.MATE_FALSE);
 			if (lateMap != null && lateMap.get("id") != null) {

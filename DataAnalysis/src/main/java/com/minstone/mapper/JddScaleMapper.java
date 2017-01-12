@@ -1,6 +1,7 @@
 package com.minstone.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -23,4 +24,5 @@ public interface JddScaleMapper {
     int updateByExample(@Param("record") JddScale record, @Param("example") JddScaleExample example);
 
 	void deleteColumnData(String column);
+	List<Map<String, Object>> queryColumnRank(String column);
 }

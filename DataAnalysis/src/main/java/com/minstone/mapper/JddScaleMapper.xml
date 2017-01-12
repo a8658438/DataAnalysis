@@ -192,7 +192,7 @@
   </delete>
   
   <!-- 统计各列的概率排行 -->
-  <select id="queryColumnRank" parameterType="string">
+ <!--  <select id="queryColumnRank" parameterType="string" resultType="map">
   	SELECT
 		*
 	FROM
@@ -324,5 +324,83 @@
 		) AS s5
 	ORDER BY
 		s5.rownum ASC
+		
+	LIMIT 0,10
+  </select> -->
+  
+  <select id="queryColumnRank" parameterType="string" resultType="map">
+  	SELECT
+		*
+	FROM
+		(
+			SELECT
+				s1.num,
+				s1.rownum1 + s2.rownum2 AS rownum
+			FROM
+				(
+					SELECT
+						obj1.num,
+						obj1.late_all_scale,
+						CASE
+					WHEN @rowtotal1 = obj1.late_all_scale THEN
+						@rownum1
+					WHEN @rowtotal1 := obj1.late_all_scale THEN
+						@rownum1 :=@rownum1 + 1
+					WHEN @rowtotal1 = 0 THEN
+						@rownum1 :=@rownum1 + 1
+					END AS rownum1
+					FROM
+						(
+							SELECT
+								num,
+								late_all_scale
+							FROM
+								jdd_scale t1
+							WHERE
+								t1.column_name = #{column}
+							ORDER BY
+								t1.late_all_scale DESC
+						) AS obj1,
+						(
+							SELECT
+								@rownum1 := 0 ,@rowtotal1 := NULL
+						) AS r1
+				) s1,
+				(
+					SELECT
+						obj2.num,
+						obj2.other_scale,
+						CASE
+					WHEN @rowtotal2 = obj2.other_scale THEN
+						@rownum2
+					WHEN @rowtotal2 := obj2.other_scale THEN
+						@rownum2 :=@rownum2 + 1
+					WHEN @rowtotal2 = 0 THEN
+						@rownum2 :=@rownum2 + 1
+					END AS rownum2
+					FROM
+						(
+							SELECT
+								num,
+								other_scale
+							FROM
+								jdd_scale t2
+							WHERE
+								t2.column_name = #{column}
+							ORDER BY
+								t2.other_scale DESC
+						) AS obj2,
+						(
+							SELECT
+								@rownum2 := 0 ,@rowtotal2 := NULL
+						) AS r2
+				) s2
+			WHERE
+				s1.num = s2.num
+		) AS s5
+	ORDER BY
+		s5.rownum ASC
+		
+	LIMIT 0,10
   </select>
 </mapper>
