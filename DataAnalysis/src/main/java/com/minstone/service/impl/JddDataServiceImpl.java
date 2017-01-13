@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.omg.PortableInterceptor.INACTIVE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -177,8 +178,8 @@ public class JddDataServiceImpl implements JddDataService{
 		count += numMap.get(Constant.COLUMN_AND);//列和值是否符合
 		count += numMap.get(Constant.ALL_AVG);//全表平均频率出现值是否符合
 		count += numMap.get(Constant.MAX_MIN);//取值范围是否符合
-		count += numMap.get(Constant.COLUMN_AVG);//列平均频率出现值是否符合
-		//如果不属于近5期的热门区间+1
+//		count += numMap.get(Constant.COLUMN_AVG);//列平均频率出现值是否符合
+		//如果属于近5期的热门区间+1
 		count += numMap.get(Constant.LATE_RANGE_5) != 0 ? 1 : 0;
 		//如果属于近10期热门期间+1
 		count += numMap.get(Constant.LATE_RANGE_10) != 0 ? 1 : 0;
@@ -187,7 +188,7 @@ public class JddDataServiceImpl implements JddDataService{
 		//如果属于近30期热门期间+1
 		count += numMap.get(Constant.LATE_RANGE_30) != 0 ? 1 : 0;
 		
-		//近5期出现过的将下次出现的概率-1
+		//近5期出现过的将下次出现的概率+1
 		count += numMap.get(Constant.LATE_5) != 0 ? 1 : 0;
 		count += numMap.get(Constant.LATE_10) != 0 ? 1 : 0;
 		count += numMap.get(Constant.LATE_20) != 0 ? 1 : 0;
@@ -491,5 +492,31 @@ public class JddDataServiceImpl implements JddDataService{
 		subParam.put("avg", avgNum);
 		
 		return subParam;
+	}
+	
+	@Override
+	public Map<String, Object> validate(List<Integer> numList,Integer id) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("startNum", id);
+		param.put("endNum", id);
+		//查询近30期的数据
+		List<Map<String,Integer>> list = mapper.selectByColumn(param);
+		param.clear();
+		
+		param.put("stageNumber", id);//期数
+		String nums = "";
+		boolean flag = false;
+		//循环匹配统计
+		for (Map<String, Integer> map : list) {
+			for (String key : map.keySet()) {
+				if (numList.contains(map.get(key))) {//循环进行数字匹配
+					nums += "、"+map.get(key);
+					flag = true;
+				}
+			}
+		}
+		param.put("mateNumbers",StringUtils.isBlank(nums) ? "" : nums.substring(1));//匹配的数字
+		param.put("mate", flag);
+		return param;
 	}
 }

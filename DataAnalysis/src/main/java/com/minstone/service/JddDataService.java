@@ -32,4 +32,11 @@ public interface JddDataService {
 	 * @return
 	 */
 	Map<Integer, Map<String, Integer>> getNumbersDataForColumn(Integer num,String column);
+
+	/**
+	 * 校验是否匹配（计算与前三十期的匹配率）
+	 * @param numList
+	 * @return 
+	 */
+	Map<String, Object> validate(List<Integer> numList, Integer id);
 }

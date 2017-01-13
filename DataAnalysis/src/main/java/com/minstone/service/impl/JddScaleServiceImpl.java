@@ -48,7 +48,7 @@ public class JddScaleServiceImpl implements JddScaleService {
 	public List<Integer> getMaybeNumbers(List<Map<String, Object>> rank,
 			Map<Integer, Map<String, Integer>> numberData, List<Integer> numList) {
 		//循环数据库统计出的前十位数字
-		Integer rownum = ((Double)rank.get(0).get("rownum")).intValue();
+		Integer rownum = (int) (Double.parseDouble(rank.get(0).get("rownum").toString()));
 		Integer num = (Integer) rank.get(0).get("num");
 		Integer realNum = sameRankCompare(1, rank, rownum, num, numList, numberData);
 		numList.add(realNum);
@@ -68,7 +68,10 @@ public class JddScaleServiceImpl implements JddScaleService {
 	 * @return
 	 */
 	private Integer sameRankCompare(Integer index,List<Map<String, Object>> rank,Integer rownum,Integer num,List<Integer> numList,Map<Integer, Map<String, Integer>> numberData){
-		Integer rownum2 = ((Double)rank.get(index).get("rownum")).intValue();
+		if (index==rank.size()) {
+			return num;
+		}
+		Integer rownum2 = (int) (Double.parseDouble(rank.get(index).get("rownum").toString()));
 		Integer num2 = (Integer) rank.get(index).get("num");
 		if (rownum == rownum2) {//如果两数字综合排名一致
 			if (!numList.contains(num) && !numList.contains(num2)) {//两个数字都不包含
@@ -118,12 +121,4 @@ public class JddScaleServiceImpl implements JddScaleService {
 		}
 	}
 
-	@Override
-	public void validate(List<Integer> numList) {
-		StringBuffer s = new StringBuffer();
-		for (Integer num : numList) {
-			s.append(","+num);
-		}
-		s.substring(1);
-	}
 }

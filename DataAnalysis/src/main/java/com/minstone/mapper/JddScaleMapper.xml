@@ -192,7 +192,7 @@
   </delete>
   
   <!-- 统计各列的概率排行 -->
- <!--  <select id="queryColumnRank" parameterType="string" resultType="map">
+ <select id="queryColumnRank" parameterType="string" resultType="map">
   	SELECT
 		*
 	FROM
@@ -326,9 +326,9 @@
 		s5.rownum ASC
 		
 	LIMIT 0,10
-  </select> -->
+  </select>   
   
-  <select id="queryColumnRank" parameterType="string" resultType="map">
+  <!--  <select id="queryColumnRank" parameterType="string" resultType="map">
   	SELECT
 		*
 	FROM
@@ -402,5 +402,50 @@
 		s5.rownum ASC
 		
 	LIMIT 0,10
-  </select>
+  </select>   -->
+  
+  <!-- <select id="queryColumnRank" parameterType="string" resultType="map">
+  	SELECT
+		*
+	FROM
+		(
+			SELECT
+				s2.num,
+				s2.rownum2 AS rownum
+			FROM
+				(
+					SELECT
+						obj2.num,
+						obj2.other_scale,
+						CASE
+					WHEN @rowtotal2 = obj2.other_scale THEN
+						@rownum2
+					WHEN @rowtotal2 := obj2.other_scale THEN
+						@rownum2 :=@rownum2 + 1
+					WHEN @rowtotal2 = 0 THEN
+						@rownum2 :=@rownum2 + 1
+					END AS rownum2
+					FROM
+						(
+							SELECT
+								num,
+								other_scale
+							FROM
+								jdd_scale t2
+							WHERE
+								t2.column_name = #{column}
+							ORDER BY
+								t2.other_scale DESC
+						) AS obj2,
+						(
+							SELECT
+								@rownum2 := 0 ,@rowtotal2 := NULL
+						) AS r2
+				) s2
+		) AS s5
+	ORDER BY
+		s5.rownum ASC
+		
+	LIMIT 0,10
+  </select>  -->
 </mapper>

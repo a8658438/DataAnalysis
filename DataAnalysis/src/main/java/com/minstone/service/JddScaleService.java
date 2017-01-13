@@ -27,9 +27,4 @@ public interface JddScaleService {
 	List<Integer> getMaybeNumbers(List<Map<String, Object>> rank,
 			Map<Integer, Map<String, Integer>> numberData, List<Integer> numList);
 
-	/**
-	 * 校验是否匹配
-	 * @param numList
-	 */
-	void validate(List<Integer> numList);
 }
