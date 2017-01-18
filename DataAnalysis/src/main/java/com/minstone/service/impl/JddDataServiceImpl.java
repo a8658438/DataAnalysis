@@ -523,9 +523,12 @@ public class JddDataServiceImpl implements JddDataService{
 	}
 
 	@Override
-	public List<JddData> selectAllData() {
+	public List<JddData> selectAllData(Integer startId, Integer endId) {
 		JddDataExample example = new JddDataExample();
 		example.setOrderByClause("id desc");
+		if (startId != null && endId != null) {
+			example.createCriteria().andIdBetween(startId, endId);
+		}
 		return mapper.selectByExample(example);
 	}
 }

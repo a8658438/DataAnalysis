@@ -22,6 +22,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		.boder-right{
 			border-right-color: red;
 		}
+		.bg-color{
+			background-color: green;
+		}
 	</style>
   </head>
   
@@ -48,6 +51,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	   			<td>${jdd.id}</td>	
 	   			<c:forEach items="${numbers}" var="num" varStatus="status">
 	   				<td class="${(status.index+1) % 7 == 0 ? 'boder-right' : ''}"
+	   					flag="${num == jdd.one || num == jdd.two || num == jdd.three || num == jdd.four || num == jdd.five || num == jdd.six? 'num' : ''}"
 	   				    lang="${num == jdd.one || num == jdd.two || num == jdd.three || num == jdd.four || num == jdd.five || num == jdd.six? num : ''}">
 	   					${num == jdd.one || num == jdd.two || num == jdd.three || num == jdd.four || num == jdd.five || num == jdd.six? num : ''}
 	   				</td>
@@ -59,10 +63,31 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
    	
    	<script type="text/javascript">
    		$(function(){
-   			var trs = $("#area").nextAll();
-   			var tds = $("td[lang!='']").size();
-   			$.each(tds,function(index,){
-   			
+   			var tds = $("td[flag='num']");
+   			$.each(tds,function(index,td){
+	   			var val = $(td).attr("lang");
+	   			var val1 = val/7;
+	   			var val2 = val%7;
+	   			if(val1 < 1 || (val1==1 && val2 == 0)) {
+	   				val = 1;
+	   			}else if(val1 < 2 || (val1==2 && val2 == 0)){
+	   				val = 2 ;
+	   			}else if(val1 < 3 || (val1==3 && val2 == 0)){
+	   				val =3;
+	   			}else if(val1 <4 || (val1==4 && val2 == 0)){
+	   				val =4;
+	   			}else if(val1 < 5 || (val1==5 && val2 == 0)){
+	   				val =5
+	   			}else if(val1 < 6 || (val1==6 && val2 == 0)){
+	   				val = 6;
+	   			}else{
+	   				val =7;
+	   			}
+	   			var childs = $(td).parent().children();
+	   			val = val * 7;
+	   			for(var i = val - 6;i<=val ;i++){
+	   				$(childs[i]).addClass("bg-color");
+	   			}
    			});
    		});
    	</script>
