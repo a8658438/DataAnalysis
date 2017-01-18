@@ -3,6 +3,7 @@ package com.minstone.service;
 import java.util.List;
 import java.util.Map;
 
+import com.minstone.pojo.JddData;
 import com.minstone.util.Result;
 
 public interface JddDataService {
@@ -39,4 +40,10 @@ public interface JddDataService {
 	 * @return 
 	 */
 	Map<String, Object> validate(List<Integer> numList, Integer id);
+
+	/**
+	 * 查询列表数据
+	 * @return
+	 */
+	List<JddData> selectAllData();
 }

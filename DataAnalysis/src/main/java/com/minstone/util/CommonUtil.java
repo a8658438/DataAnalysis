@@ -2,6 +2,8 @@ package com.minstone.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -16,5 +18,16 @@ public class CommonUtil {
 	 */
 	public static Double getNumDecimal(Double num,int scaleNum){
 		return new BigDecimal(num).setScale(scaleNum, RoundingMode.HALF_EVEN).doubleValue();
+	}
+	/**
+	 * 获取1到49的数字集合
+	 * @return
+	 */
+	public static List<Integer> getAllNumbers() {
+		List<Integer> list = new ArrayList<Integer>();
+		for (int i = 1; i < 50; i++) {
+			list.add(i);
+		}
+		return list ;
 	}
 }

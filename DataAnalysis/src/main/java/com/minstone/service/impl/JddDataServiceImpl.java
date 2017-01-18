@@ -17,6 +17,8 @@ import aj.org.objectweb.asm.Type;
 
 import com.minstone.mapper.JddDataMapper;
 import com.minstone.pojo.JddData;
+import com.minstone.pojo.JddDataExample;
+import com.minstone.pojo.JddDataExample.Criteria;
 import com.minstone.service.JddDataService;
 import com.minstone.util.CommonUtil;
 import com.minstone.util.Constant;
@@ -518,5 +520,12 @@ public class JddDataServiceImpl implements JddDataService{
 		param.put("mateNumbers",StringUtils.isBlank(nums) ? "" : nums.substring(1));//匹配的数字
 		param.put("mate", flag);
 		return param;
+	}
+
+	@Override
+	public List<JddData> selectAllData() {
+		JddDataExample example = new JddDataExample();
+		example.setOrderByClause("id desc");
+		return mapper.selectByExample(example);
 	}
 }

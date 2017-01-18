@@ -27,11 +27,13 @@
         </property>
     </bean>
     
+    <mvc:resources location="/WEB-INF/css/" mapping="/css/**"/>
+	<mvc:resources location="/WEB-INF/js/" mapping="/js/**"/>
     <!-- 修改springmvc解析JSP -->
 	<bean id="viewResolverCommon" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
-		<property name="prefix" value="/WEB-INF"></property>
-		<property name="suffix" value=""></property>
+		<property name="prefix" value="/WEB-INF/"></property>
+		<property name="suffix" value=".jsp"></property>
 		<property name="order" value="2"/>  
 	</bean>
 

@@ -9,10 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.minstone.pojo.JddData;
 import com.minstone.service.JddDataService;
 import com.minstone.service.JddScaleService;
 import com.minstone.util.CommonUtil;
@@ -86,5 +88,14 @@ public class JddDataController {
 		Double d = CommonUtil.getNumDecimal(Double.parseDouble(count+"") / Double.parseDouble(nums+""), 2);
 		list.add(0, d);
 		return Result.ok(list);
+	}
+	
+	@RequestMapping("/showJddData")
+	public String showJddData(Model model) {
+		//查询列表数据
+		List<JddData> list = service.selectAllData();
+		model.addAttribute("data", list);
+		model.addAttribute("numbers", CommonUtil.getAllNumbers());
+		return "data_sum";
 	}
 }
