@@ -49,4 +49,18 @@ public interface JddDataService {
 	 * @return
 	 */
 	List<JddData> selectAllData(Integer startId, Integer endId, String orderBy);
+	
+	/**
+	 * 获取谋洌的最大值和最小值
+	 * @param param
+	 * @return
+	 */
+	Map<String,Integer> selectMaxAndMinByColumn(Map<String, Object> param);
+
+	/**
+	 * 统计每列数字所出现的次数
+	 * @param column
+	 * @return
+	 */
+	List<Map<String, Long>> countNumberShows(String column);
 }

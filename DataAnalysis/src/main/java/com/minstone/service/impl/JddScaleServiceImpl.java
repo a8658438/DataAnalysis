@@ -47,6 +47,9 @@ public class JddScaleServiceImpl implements JddScaleService {
 	@Override
 	public List<Integer> getMaybeNumbers(List<Map<String, Object>> rank,
 			Map<Integer, Map<String, Integer>> numberData, List<Integer> numList) {
+		if (rank == null || rank.size() == 0) return numList;
+		
+		
 		//循环数据库统计出的前十位数字
 		Integer rownum = (int) (Double.parseDouble(rank.get(0).get("rownum").toString()));
 		Integer num = (Integer) rank.get(0).get("num");

@@ -37,4 +37,6 @@ public interface JddDataMapper {
     List<Map<String, Integer>> selectByColumn(Map<String, Object> param);
     Map<String, Integer> selectLateId(Map<String, Object> param);
     List<Map<String, Integer>> selectIsShowId(Map<String, Object> param);
+
+	Map<String, Integer> countNumberShows(String column);
 }

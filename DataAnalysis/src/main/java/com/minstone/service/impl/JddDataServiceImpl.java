@@ -531,4 +531,19 @@ public class JddDataServiceImpl implements JddDataService{
 		}
 		return mapper.selectByExample(example);
 	}
+
+	@Override
+	public Map<String, Integer> selectMaxAndMinByColumn(
+			Map<String, Object> param) {
+		// TODO Auto-generated method stub
+		return mapper.selectMaxAndMinByColumn(param);
+	}
+
+	@Override
+	public List<Map<String, Long>> countNumberShows(String column) {
+		// TODO Auto-generated method stub
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("column", column);
+		return mapper.selectCountByColumn(param);
+	}
 }

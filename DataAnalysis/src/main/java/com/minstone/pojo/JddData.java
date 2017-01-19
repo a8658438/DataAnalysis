@@ -70,4 +70,19 @@ public class JddData {
     public void setSix(Integer six) {
         this.six = six;
     }
+    
+    /**
+     * 计算所有号码总和
+     * @return
+     */
+    public Integer sum() {
+		return one + two + three +four +five +six;
+	}
+    /**
+     * 计算所有号码除以7的平均数
+     * @return
+     */
+    public Integer avg() {
+    	return sum()/7;
+    }
 }
