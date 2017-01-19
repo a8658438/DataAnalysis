@@ -45,7 +45,8 @@ public interface JddDataService {
 	 * 查询列表数据
 	 * @param endId 
 	 * @param startId 
+	 * @param orderBy 
 	 * @return
 	 */
-	List<JddData> selectAllData(Integer startId, Integer endId);
+	List<JddData> selectAllData(Integer startId, Integer endId, String orderBy);
 }

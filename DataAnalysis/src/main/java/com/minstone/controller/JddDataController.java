@@ -106,7 +106,7 @@ public class JddDataController {
 			System.out.println("当前计算第："+id1+"期");
 			List<Integer> numList = new ArrayList<Integer>();
 			
-			List<JddData> list1 = service.selectAllData(1,id - 1);
+			List<JddData> list1 = service.selectAllData(1,id - 1,"id desc");
 			List<Integer> numbers = new ArrayList<Integer>();
 			Map<String, Integer> map = new HashMap<String, Integer>();
 			
@@ -201,7 +201,7 @@ public class JddDataController {
 	@RequestMapping("/showJddData")
 	public String showJddData(Model model) {
 		//查询列表数据
-		List<JddData> list = service.selectAllData(null,null);
+		List<JddData> list = service.selectAllData(null,null,"id desc");
 		model.addAttribute("data", list);
 		model.addAttribute("numbers", CommonUtil.getAllNumbers());
 		return "data_sum";

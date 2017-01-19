@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
@@ -11,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.minstone.pojo.JddData;
 import com.minstone.service.JddDataService;
+import com.minstone.service.JddExcludeService;
 import com.minstone.service.JddScaleService;
 import com.minstone.util.Constant;
 
@@ -64,7 +66,7 @@ public class JddDataTest {
 		JddScaleService scaleService = context.getBean(JddScaleService.class);
 		
 		Integer stageNum = 147;//计算的期数
-		List<JddData> list = service.selectAllData(1,stageNum - 1);
+		List<JddData> list = service.selectAllData(1,stageNum - 1,"id desc");
 		List<Integer> numbers = new ArrayList<Integer>();
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		
@@ -149,6 +151,37 @@ public class JddDataTest {
 			}
 	}
 	
+	@Test
+	public void test3() {
+		JddDataService service = context.getBean(JddDataService.class);
+		JddScaleService scaleService = context.getBean(JddScaleService.class);
+		JddExcludeService excludeService = context.getBean(JddExcludeService.class);
+		int id = 154;
+		
+		Map<Integer, List<Integer>> map = excludeService.queryStageExcludeArea(1, id-1, "id desc");
+		Integer[] keySet = map.keySet().toArray(new Integer[map.size()]);
+		for (int n = 1; n < 16; n++) {//上几期的几
+			System.out.println("上"+n+"期：");
+			int count = 0;
+			for (int i = keySet.length -1; i >= n ; i--) {
+				Integer sq1 = keySet[i];
+				Integer sq2 = keySet[i - n];
+				//获取这两期未出的区域
+				List<Integer> list1 = map.get(sq1);
+				List<Integer> list2 = map.get(sq2);
+				for (Integer area1 : list1) {
+					for (Integer area2 : list2) {
+						if (area1 == area2) {
+							count ++;
+						}
+					}
+				}
+			}
+			System.out.println("次数："+count);
+			System.out.println("=================================》");
+		}
+		
+	}
 	public static void main(String[] args) {
 		System.out.println(22);
 	}
