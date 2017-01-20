@@ -383,6 +383,42 @@ public class JddDataTest {
 //				System.out.println(integer);
 //			}
 	}
+	
+	@Test
+	public void test7() {
+		JddDataService service = context.getBean(JddDataService.class);
+		JddScaleService scaleService = context.getBean(JddScaleService.class);
+		int id = 154;
+		List<JddData> list = service.selectAllData(1, id-1, "id desc");
+		
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		//分开统计各列数据
+		int count = 0;
+		int sum = 0;
+		for (int n = 1; n < 16; n++) {//上几期的几
+			System.out.println("上"+n+"期：");
+			for (int i = 0; i < list.size()-n; i++) {
+				JddData jdd1 = list.get(i);
+				JddData jdd2 = list.get(i + n);
+				
+				int sq1 = jdd1.getSix();
+				int sq2 = jdd2.getSix();
+				
+				int x = sq2 > sq1 ? sq2 - sq1 : sq1 - sq2;
+				sum += x;
+				count ++;
+				map.put(x+"-"+n, map.get(x+"-"+n) == null ? 1 : map.get(x+"-"+n)+1);
+			}
+			System.out.println("=================================》");
+		}
+		for (String key : map.keySet()) {
+			System.out.println("差值和期数："+key+"==》出现的次数："+map.get(key));
+		}
+		System.out.println(sum/count);
+		System.out.println(sum%count);
+		//差值从0到23 ，那是否将循环从1到9改为0到23呢？中间的数值又要取多少好呢？
+		
+	}
 	public static void main(String[] args) {
 		System.out.println(22);
 	}
